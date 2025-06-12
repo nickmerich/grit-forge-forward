@@ -35,7 +35,7 @@ export const AuthForm = () => {
       <div className="brutalist-header">
         <h1 className="brutalist-h1 text-center">GRYT</h1>
         <p className="text-center text-lg font-bold mt-2">
-          BECOME THE BEST VERSION OF YOU
+          UNLOCK THE BEST VERSION OF YOU
         </p>
       </div>
 
