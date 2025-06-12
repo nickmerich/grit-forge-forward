@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { useGoalStore } from '@/hooks/useGoalStore';
+import { useSupabaseGoalStore } from '@/hooks/useSupabaseGoalStore';
+import { useAuth } from '@/hooks/useAuth';
 import BrutalistCard from '@/components/BrutalistCard';
 import BrutalistButton from '@/components/BrutalistButton';
 import BrutalistProgressBar from '@/components/BrutalistProgressBar';
@@ -9,15 +10,34 @@ import { DAILY_AFFIRMATIONS } from '@/types/gryt';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
-  const { user, currentGoal, todaysCoaching, updateGoalProgress } = useGoalStore();
+  const { signOut } = useAuth();
+  const { profile, currentGoal, todaysCoaching, growthPoints, isLoading, updateGoalProgress } = useSupabaseGoalStore();
   const navigate = useNavigate();
+
+  if (isLoading) {
+    return (
+      <div className="brutalist-container">
+        <div className="brutalist-header text-center">
+          <h1 className="brutalist-h1">GRYT</h1>
+          <p className="font-bold">LOADING YOUR DATA...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!currentGoal) {
     return (
       <div className="brutalist-container">
         <div className="brutalist-header">
-          <h1 className="brutalist-h1 text-center">GRYT</h1>
-          <p className="text-center text-lg font-bold mt-2">BECOME THE BEST VERSION OF YOU</p>
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="brutalist-h1">GRYT</h1>
+            <BrutalistButton variant="secondary" onClick={signOut}>
+              LOGOUT
+            </BrutalistButton>
+          </div>
+          <p className="text-center text-lg font-bold mt-2">
+            WELCOME {profile?.full_name?.toUpperCase() || 'GRYT USER'}
+          </p>
         </div>
 
         <div className="brutalist-section text-center space-y-6">
@@ -47,7 +67,7 @@ const Dashboard = () => {
   }
 
   const daysLeft = Math.ceil((currentGoal.deadline.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-  const todaysAffirmation = DAILY_AFFIRMATIONS[Math.floor(Math.random() * DAILY_AFFIRMATIONS.length)];
+  const todaysAffirmation = todaysCoaching?.affirmation || DAILY_AFFIRMATIONS[Math.floor(Math.random() * DAILY_AFFIRMATIONS.length)];
 
   return (
     <div className="brutalist-container pb-20">
@@ -56,11 +76,14 @@ const Dashboard = () => {
         <div className="flex justify-between items-center mb-4">
           <div>
             <h1 className="brutalist-h1">GRYT</h1>
-            <p className="font-bold">LEVEL {user.growthPoints.level}</p>
+            <p className="font-bold">LEVEL {growthPoints?.level || 1}</p>
           </div>
           <div className="text-right">
-            <p className="brutalist-h2">{user.growthPoints.total}</p>
+            <p className="brutalist-h2">{growthPoints?.total || 0}</p>
             <p className="text-sm font-bold">POINTS</p>
+            <BrutalistButton variant="secondary" onClick={signOut} className="mt-2 text-xs">
+              LOGOUT
+            </BrutalistButton>
           </div>
         </div>
         
@@ -91,22 +114,22 @@ const Dashboard = () => {
         <BrutalistCard>
           <h2 className="brutalist-h2 mb-4">TODAY'S ACTION</h2>
           <p className="font-bold mb-6 text-lg">
-            {todaysCoaching.actionStep}
+            {todaysCoaching?.actionStep || "Take one step towards your goal today."}
           </p>
           
           <div className="space-y-4">
-            {!todaysCoaching.completed ? (
+            {!todaysCoaching?.completed ? (
               <BrutalistButton 
                 variant="accent" 
                 onClick={() => updateGoalProgress(true)}
               >
-                ✅ MARK COMPLETE (+{user.growthPoints.dailyBonus} POINTS)
+                ✅ MARK COMPLETE (+{growthPoints?.dailyBonus || 25} POINTS)
               </BrutalistButton>
             ) : (
               <div className="space-y-4">
                 <BrutalistCard className="bg-brutalist-green border-brutalist-black">
                   <p className="brutalist-h2 text-center">✅ COMPLETED TODAY</p>
-                  <p className="text-center font-bold">+{user.growthPoints.dailyBonus} POINTS EARNED</p>
+                  <p className="text-center font-bold">+{growthPoints?.dailyBonus || 25} POINTS EARNED</p>
                 </BrutalistCard>
                 <BrutalistButton 
                   variant="secondary" 
