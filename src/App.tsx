@@ -10,6 +10,9 @@ import Dashboard from "./pages/Dashboard";
 import CreateGoal from "./pages/CreateGoal";
 import ContractCeremony from "./pages/ContractCeremony";
 import Rewards from "./pages/Rewards";
+import Premium from "./pages/Premium";
+import PremiumContent from "./pages/PremiumContent";
+import Coaching from "./pages/Coaching";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

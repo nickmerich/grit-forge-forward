@@ -9,6 +9,72 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      coaching_sessions: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          duration_minutes: number | null
+          id: string
+          session_date: string
+          session_notes: string | null
+          status: string | null
+          user_id: string | null
+          zoom_link: string | null
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          session_date: string
+          session_notes?: string | null
+          status?: string | null
+          user_id?: string | null
+          zoom_link?: string | null
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          session_date?: string
+          session_notes?: string | null
+          status?: string | null
+          user_id?: string | null
+          zoom_link?: string | null
+        }
+        Relationships: []
+      }
+      content_purchases: {
+        Row: {
+          access_expires_at: string | null
+          content_id: string
+          content_type: string
+          id: string
+          price_paid: number
+          purchase_date: string
+          user_id: string | null
+        }
+        Insert: {
+          access_expires_at?: string | null
+          content_id: string
+          content_type: string
+          id?: string
+          price_paid: number
+          purchase_date?: string
+          user_id?: string | null
+        }
+        Update: {
+          access_expires_at?: string | null
+          content_id?: string
+          content_type?: string
+          id?: string
+          price_paid?: number
+          purchase_date?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       daily_coaching: {
         Row: {
           action_step: string
@@ -131,6 +197,7 @@ export type Database = {
           daily_bonus: number | null
           earned_points: number | null
           id: string
+          premium_multiplier: number | null
           spent_points: number | null
           streak_bonus: number | null
           total_points: number | null
@@ -142,6 +209,7 @@ export type Database = {
           daily_bonus?: number | null
           earned_points?: number | null
           id?: string
+          premium_multiplier?: number | null
           spent_points?: number | null
           streak_bonus?: number | null
           total_points?: number | null
@@ -153,6 +221,7 @@ export type Database = {
           daily_bonus?: number | null
           earned_points?: number | null
           id?: string
+          premium_multiplier?: number | null
           spent_points?: number | null
           streak_bonus?: number | null
           total_points?: number | null
@@ -169,11 +238,48 @@ export type Database = {
           },
         ]
       }
+      premium_content: {
+        Row: {
+          content_type: string
+          created_at: string
+          description: string
+          file_url: string | null
+          id: string
+          is_active: boolean | null
+          preview_content: string | null
+          price: number
+          title: string
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          description: string
+          file_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          preview_content?: string | null
+          price: number
+          title: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          description?: string
+          file_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          preview_content?: string | null
+          price?: number
+          title?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
           full_name: string | null
           id: string
+          subscription_tier: string | null
           timezone: string | null
           updated_at: string | null
           username: string | null
@@ -182,6 +288,7 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id: string
+          subscription_tier?: string | null
           timezone?: string | null
           updated_at?: string | null
           username?: string | null
@@ -190,6 +297,7 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id?: string
+          subscription_tier?: string | null
           timezone?: string | null
           updated_at?: string | null
           username?: string | null
@@ -289,6 +397,50 @@ export type Database = {
           },
         ]
       }
+      reflections: {
+        Row: {
+          created_at: string
+          date: string | null
+          goal_id: string | null
+          gratitude_note: string | null
+          id: string
+          mood_score: number | null
+          reflection_text: string | null
+          tomorrow_intention: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          date?: string | null
+          goal_id?: string | null
+          gratitude_note?: string | null
+          id?: string
+          mood_score?: number | null
+          reflection_text?: string | null
+          tomorrow_intention?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          date?: string | null
+          goal_id?: string | null
+          gratitude_note?: string | null
+          id?: string
+          mood_score?: number | null
+          reflection_text?: string | null
+          tomorrow_intention?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reflections_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rewards: {
         Row: {
           available: boolean | null
@@ -299,6 +451,7 @@ export type Database = {
           external_id: string | null
           id: string
           image_url: string | null
+          is_premium: boolean | null
           points_cost: number
           title: string
         }
@@ -311,6 +464,7 @@ export type Database = {
           external_id?: string | null
           id?: string
           image_url?: string | null
+          is_premium?: boolean | null
           points_cost: number
           title: string
         }
@@ -323,8 +477,87 @@ export type Database = {
           external_id?: string | null
           id?: string
           image_url?: string | null
+          is_premium?: boolean | null
           points_cost?: number
           title?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          plan_type: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_type?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_type?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_goals: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          priority: number | null
+          progress: number | null
+          status: string | null
+          target_date: string | null
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          priority?: number | null
+          progress?: number | null
+          status?: string | null
+          target_date?: string | null
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          priority?: number | null
+          progress?: number | null
+          status?: string | null
+          target_date?: string | null
+          title?: string
+          user_id?: string | null
         }
         Relationships: []
       }

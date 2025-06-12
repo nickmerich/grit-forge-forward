@@ -1,176 +1,213 @@
 
-import React from 'react';
-import { useGoalStore } from '@/hooks/useGoalStore';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useSupabaseGoalStore } from '@/hooks/useSupabaseGoalStore';
+import { useSubscription } from '@/hooks/useSubscription';
 import BrutalistCard from '@/components/BrutalistCard';
 import BrutalistButton from '@/components/BrutalistButton';
 import BrutalistNavigation from '@/components/BrutalistNavigation';
-import { Reward } from '@/types/gryt';
+import { useToast } from '@/hooks/use-toast';
 
-const mockRewards: Reward[] = [
-  {
-    id: '1',
-    title: 'NIKE AIR ZOOM',
-    description: 'Premium running shoes for your fitness journey',
-    pointsCost: 2500,
-    category: 'fitness',
-    available: true
-  },
-  {
-    id: '2',
-    title: 'STARBUCKS $25',
-    description: 'Fuel your mornings with premium coffee',
-    pointsCost: 500,
-    category: 'food',
-    available: true
-  },
-  {
-    id: '3',
-    title: 'APPLE AIRPODS',
-    description: 'Wireless earbuds for your daily motivation',
-    pointsCost: 3000,
-    category: 'tech',
-    available: true
-  },
-  {
-    id: '4',
-    title: 'AMAZON $50',
-    description: 'Get anything you need for your goals',
-    pointsCost: 1000,
-    category: 'shopping',
-    available: true
-  },
-  {
-    id: '5',
-    title: 'NETFLIX 3 MONTHS',
-    description: 'Entertainment for your well-deserved rest',
-    pointsCost: 750,
-    category: 'entertainment',
-    available: true
-  },
-  {
-    id: '6',
-    title: 'FITBIT CHARGE',
-    description: 'Track your progress with premium wearable',
-    pointsCost: 4000,
-    category: 'fitness',
-    available: false
-  }
-];
+interface Reward {
+  id: string;
+  title: string;
+  description: string;
+  points_cost: number;
+  category: string;
+  brand_partner: string | null;
+  image_url: string | null;
+  available: boolean;
+  is_premium: boolean | null;
+}
 
 const Rewards = () => {
-  const { user } = useGoalStore();
+  const { growthPoints } = useSupabaseGoalStore();
+  const { isPremium } = useSubscription();
+  const { toast } = useToast();
+  const [rewards, setRewards] = useState<Reward[]>([]);
+  const [filter, setFilter] = useState<'all' | 'free' | 'premium'>('all');
+  const [isRedeeming, setIsRedeeming] = useState<string | null>(null);
 
-  const canAfford = (cost: number) => user.growthPoints.total >= cost;
+  useEffect(() => {
+    fetchRewards();
+  }, []);
 
-  const handleRedeem = (reward: Reward) => {
-    if (canAfford(reward.pointsCost)) {
-      // TODO: Implement redemption logic
-      console.log(`Redeeming ${reward.title} for ${reward.pointsCost} points`);
+  const fetchRewards = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('rewards')
+        .select('*')
+        .eq('available', true)
+        .order('points_cost', { ascending: true });
+
+      if (error) throw error;
+      setRewards(data || []);
+    } catch (error) {
+      console.error('Error fetching rewards:', error);
     }
+  };
+
+  const redeemReward = async (rewardId: string, pointsCost: number) => {
+    if (!growthPoints || growthPoints.total < pointsCost) {
+      toast({
+        title: "Insufficient Points",
+        description: "You don't have enough points for this reward.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsRedeeming(rewardId);
+    try {
+      // In a real implementation, this would integrate with reward fulfillment APIs
+      // For now, we'll simulate the redemption
+      const { error } = await supabase
+        .from('redemptions')
+        .insert({
+          user_id: (await supabase.auth.getUser()).data.user?.id,
+          reward_id: rewardId,
+          points_spent: pointsCost,
+          status: 'processing',
+        });
+
+      if (error) throw error;
+
+      // Update user's growth points
+      const { error: pointsError } = await supabase
+        .from('growth_points')
+        .update({
+          total_points: growthPoints.total - pointsCost,
+          spent_points: growthPoints.spent + pointsCost,
+        })
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
+
+      if (pointsError) throw pointsError;
+
+      toast({
+        title: "Reward Redeemed!",
+        description: "Your reward is being processed. Check your email for details.",
+      });
+    } catch (error) {
+      console.error('Error redeeming reward:', error);
+      toast({
+        title: "Redemption Failed",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRedeeming(null);
+    }
+  };
+
+  const filteredRewards = rewards.filter(reward => {
+    if (filter === 'free') return !reward.is_premium;
+    if (filter === 'premium') return reward.is_premium;
+    return true;
+  });
+
+  const canRedeem = (reward: Reward) => {
+    if (reward.is_premium && !isPremium) return false;
+    return growthPoints ? growthPoints.total >= reward.points_cost : false;
   };
 
   return (
     <div className="brutalist-container pb-20">
-      {/* Header */}
       <div className="brutalist-header">
-        <div className="text-center space-y-2">
-          <h1 className="brutalist-h1">REWARDS</h1>
-          <p className="font-bold">EARN YOUR SUCCESS</p>
-          <div className="mt-4">
-            <p className="brutalist-h2 text-3xl text-brutalist-green">{user.growthPoints.total}</p>
-            <p className="font-bold">GROWTH POINTS AVAILABLE</p>
-          </div>
+        <h1 className="brutalist-h1 text-center">REWARDS STORE</h1>
+        <div className="text-center">
+          <p className="font-bold text-lg">
+            YOUR POINTS: {growthPoints?.total || 0} 🏆
+          </p>
+          {!isPremium && (
+            <p className="text-sm text-gray-600 mt-2">
+              Upgrade to Pro for exclusive rewards!
+            </p>
+          )}
         </div>
       </div>
 
-      {/* Points Earning Info */}
       <div className="brutalist-section">
-        <BrutalistCard>
-          <h2 className="brutalist-h2 mb-4 text-center">EARN MORE POINTS</h2>
-          <div className="space-y-3 font-bold">
-            <div className="flex justify-between items-center">
-              <span>📅 Daily Completion</span>
-              <span className="text-brutalist-green">+{user.growthPoints.dailyBonus}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>🔥 Weekly Streak</span>
-              <span className="text-brutalist-green">+{user.growthPoints.streakBonus}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>🏆 Goal Completion</span>
-              <span className="text-brutalist-green">+500-2000</span>
-            </div>
-          </div>
-        </BrutalistCard>
-      </div>
+        <div className="flex space-x-2 mb-6">
+          <BrutalistButton
+            variant={filter === 'all' ? 'default' : 'secondary'}
+            onClick={() => setFilter('all')}
+          >
+            ALL
+          </BrutalistButton>
+          <BrutalistButton
+            variant={filter === 'free' ? 'default' : 'secondary'}
+            onClick={() => setFilter('free')}
+          >
+            FREE
+          </BrutalistButton>
+          <BrutalistButton
+            variant={filter === 'premium' ? 'default' : 'secondary'}
+            onClick={() => setFilter('premium')}
+          >
+            PRO ⭐
+          </BrutalistButton>
+        </div>
 
-      {/* Available Rewards */}
-      <div className="brutalist-section">
-        <h2 className="brutalist-h2 mb-6 text-center">AVAILABLE REWARDS</h2>
         <div className="space-y-4">
-          {mockRewards.filter(r => r.available).map((reward) => (
+          {filteredRewards.map((reward) => (
             <BrutalistCard key={reward.id}>
-              <div className="flex justify-between items-start mb-4">
+              <div className="flex justify-between items-start">
                 <div className="flex-1">
-                  <h3 className="brutalist-h2 text-lg mb-2">{reward.title}</h3>
-                  <p className="font-bold text-sm mb-3">{reward.description}</p>
-                  <p className="brutalist-h2 text-brutalist-green">
-                    {reward.pointsCost} POINTS
-                  </p>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <h3 className="font-bold text-lg">{reward.title}</h3>
+                    {reward.is_premium && (
+                      <span className="bg-yellow-400 text-black px-2 py-1 text-xs font-bold rounded">
+                        PRO
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-gray-700 mb-2">{reward.description}</p>
+                  {reward.brand_partner && (
+                    <p className="text-sm font-bold text-gray-600">
+                      Partner: {reward.brand_partner}
+                    </p>
+                  )}
                 </div>
-                <div className="ml-4">
-                  {reward.category === 'fitness' && '🏃‍♂️'}
-                  {reward.category === 'food' && '☕'}
-                  {reward.category === 'tech' && '🎧'}
-                  {reward.category === 'shopping' && '🛍️'}
-                  {reward.category === 'entertainment' && '📺'}
+                
+                <div className="text-right">
+                  <p className="font-bold text-xl mb-2">{reward.points_cost} pts</p>
+                  
+                  {reward.is_premium && !isPremium ? (
+                    <BrutalistButton variant="secondary" disabled>
+                      PRO ONLY
+                    </BrutalistButton>
+                  ) : (
+                    <BrutalistButton
+                      onClick={() => redeemReward(reward.id, reward.points_cost)}
+                      disabled={!canRedeem(reward) || isRedeeming === reward.id}
+                      variant={canRedeem(reward) ? 'accent' : 'secondary'}
+                    >
+                      {isRedeeming === reward.id ? 'REDEEMING...' : 
+                       canRedeem(reward) ? 'REDEEM' : 'NOT ENOUGH'}
+                    </BrutalistButton>
+                  )}
                 </div>
               </div>
-              
-              <BrutalistButton
-                variant={canAfford(reward.pointsCost) ? 'accent' : 'secondary'}
-                disabled={!canAfford(reward.pointsCost)}
-                onClick={() => handleRedeem(reward)}
-              >
-                {canAfford(reward.pointsCost) ? '🔥 REDEEM NOW' : '💪 KEEP GRINDING'}
-              </BrutalistButton>
             </BrutalistCard>
           ))}
         </div>
+
+        {filteredRewards.length === 0 && (
+          <BrutalistCard>
+            <div className="text-center py-8">
+              <h3 className="font-bold text-lg mb-2">NO REWARDS FOUND</h3>
+              <p className="text-gray-600">Try adjusting your filter or check back later!</p>
+            </div>
+          </BrutalistCard>
+        )}
       </div>
 
-      {/* Coming Soon */}
-      <div className="brutalist-section">
-        <h2 className="brutalist-h2 mb-6 text-center">COMING SOON</h2>
-        <div className="space-y-4">
-          {mockRewards.filter(r => !r.available).map((reward) => (
-            <BrutalistCard key={reward.id} className="opacity-75">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                  <h3 className="brutalist-h2 text-lg mb-2">{reward.title}</h3>
-                  <p className="font-bold text-sm mb-3">{reward.description}</p>
-                  <p className="brutalist-h2">
-                    {reward.pointsCost} POINTS
-                  </p>
-                </div>
-                <div className="ml-4">🔒</div>
-              </div>
-              
-              <BrutalistButton variant="secondary" disabled>
-                COMING SOON
-              </BrutalistButton>
-            </BrutalistCard>
-          ))}
-        </div>
-      </div>
-
-      {/* Navigation */}
       <BrutalistNavigation 
         items={[
           { label: 'DASHBOARD', path: '/', icon: '🏠' },
           { label: 'GOALS', path: '/create-goal', icon: '🎯' },
           { label: 'REWARDS', path: '/rewards', icon: '🏆' },
-          { label: 'PROFILE', path: '/profile', icon: '👤' }
+          { label: 'PRO', path: '/premium', icon: '⭐' }
         ]}
       />
     </div>

@@ -1,185 +1,146 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useSupabaseGoalStore } from '@/hooks/useSupabaseGoalStore';
-import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
 import BrutalistCard from '@/components/BrutalistCard';
 import BrutalistButton from '@/components/BrutalistButton';
-import BrutalistProgressBar from '@/components/BrutalistProgressBar';
 import BrutalistNavigation from '@/components/BrutalistNavigation';
-import { DAILY_AFFIRMATIONS } from '@/types/gryt';
-import { useNavigate } from 'react-router-dom';
+import BrutalistProgressBar from '@/components/BrutalistProgressBar';
 
 const Dashboard = () => {
-  const { signOut } = useAuth();
-  const { profile, currentGoal, todaysCoaching, growthPoints, isLoading, updateGoalProgress } = useSupabaseGoalStore();
-  const navigate = useNavigate();
+  const { currentGoal, todaysCoaching, growthPoints, updateGoalProgress } = useSupabaseGoalStore();
+  const { isPremium } = useSubscription();
 
-  if (isLoading) {
-    return (
-      <div className="brutalist-container">
-        <div className="brutalist-header text-center">
-          <h1 className="brutalist-h1">GRYT</h1>
-          <p className="font-bold">LOADING YOUR DATA...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!currentGoal) {
-    return (
-      <div className="brutalist-container">
-        <div className="brutalist-header">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="brutalist-h1">GRYT</h1>
-            <BrutalistButton variant="secondary" onClick={signOut}>
-              LOGOUT
-            </BrutalistButton>
-          </div>
-          <p className="text-center text-lg font-bold mt-2">
-            WELCOME {profile?.full_name?.toUpperCase() || 'GRYT USER'}
-          </p>
-        </div>
-
-        <div className="brutalist-section text-center space-y-6">
-          <BrutalistCard>
-            <h2 className="brutalist-h2 mb-4">NO ACTIVE GOAL</h2>
-            <p className="font-bold mb-6">
-              EVERY LEGEND STARTS WITH A SINGLE DECISION.
-              <br />
-              WHAT'S YOURS?
-            </p>
-            <BrutalistButton onClick={() => navigate('/create-goal')}>
-              SET YOUR GOAL
-            </BrutalistButton>
-          </BrutalistCard>
-        </div>
-
-        <BrutalistNavigation 
-          items={[
-            { label: 'DASHBOARD', path: '/', icon: '🏠' },
-            { label: 'GOALS', path: '/create-goal', icon: '🎯' },
-            { label: 'REWARDS', path: '/rewards', icon: '🏆' },
-            { label: 'PROFILE', path: '/profile', icon: '👤' }
-          ]}
-        />
-      </div>
-    );
-  }
-
-  const daysLeft = Math.ceil((currentGoal.deadline.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-  const todaysAffirmation = todaysCoaching?.affirmation || DAILY_AFFIRMATIONS[Math.floor(Math.random() * DAILY_AFFIRMATIONS.length)];
+  const handleToggleProgress = () => {
+    if (todaysCoaching) {
+      updateGoalProgress(!todaysCoaching.completed);
+    }
+  };
 
   return (
     <div className="brutalist-container pb-20">
-      {/* Header */}
       <div className="brutalist-header">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h1 className="brutalist-h1">GRYT</h1>
-            <p className="font-bold">LEVEL {growthPoints?.level || 1}</p>
+        <h1 className="brutalist-h1 text-center">GRYT DASHBOARD</h1>
+        <div className="flex justify-center items-center space-x-4">
+          <div className="text-center">
+            <p className="font-bold">{growthPoints?.total || 0} POINTS</p>
+            <p className="text-sm">Level {growthPoints?.level || 1}</p>
           </div>
-          <div className="text-right">
-            <p className="brutalist-h2">{growthPoints?.total || 0}</p>
-            <p className="text-sm font-bold">POINTS</p>
-            <BrutalistButton variant="secondary" onClick={signOut} className="mt-2 text-xs">
-              LOGOUT
-            </BrutalistButton>
-          </div>
-        </div>
-        
-        <BrutalistProgressBar 
-          progress={currentGoal.progress} 
-          label={`${currentGoal.title} PROGRESS`}
-          className="mb-4"
-        />
-        
-        <div className="flex justify-between text-sm font-bold">
-          <span>🔥 {currentGoal.dailyStreak} DAY STREAK</span>
-          <span>⏰ {daysLeft} DAYS LEFT</span>
+          {isPremium && (
+            <div className="bg-yellow-400 text-black px-3 py-1 rounded font-bold text-sm">
+              PRO ⭐
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Daily Affirmation */}
-      <div className="brutalist-section">
-        <BrutalistCard glow>
-          <h2 className="brutalist-h2 mb-4 text-center">TODAY'S POWER</h2>
-          <p className="text-center font-bold text-lg leading-relaxed">
-            "{todaysAffirmation}"
-          </p>
-        </BrutalistCard>
-      </div>
-
-      {/* Action Step */}
-      <div className="brutalist-section">
-        <BrutalistCard>
-          <h2 className="brutalist-h2 mb-4">TODAY'S ACTION</h2>
-          <p className="font-bold mb-6 text-lg">
-            {todaysCoaching?.actionStep || "Take one step towards your goal today."}
-          </p>
-          
-          <div className="space-y-4">
-            {!todaysCoaching?.completed ? (
-              <BrutalistButton 
-                variant="accent" 
-                onClick={() => updateGoalProgress(true)}
-              >
-                ✅ MARK COMPLETE (+{growthPoints?.dailyBonus || 25} POINTS)
-              </BrutalistButton>
-            ) : (
-              <div className="space-y-4">
-                <BrutalistCard className="bg-brutalist-green border-brutalist-black">
-                  <p className="brutalist-h2 text-center">✅ COMPLETED TODAY</p>
-                  <p className="text-center font-bold">+{growthPoints?.dailyBonus || 25} POINTS EARNED</p>
-                </BrutalistCard>
-                <BrutalistButton 
-                  variant="secondary" 
-                  onClick={() => updateGoalProgress(false)}
-                >
-                  UNDO COMPLETION
+      <div className="brutalist-section space-y-6">
+        {!isPremium && (
+          <BrutalistCard>
+            <div className="text-center">
+              <h2 className="brutalist-h2 mb-4">UNLOCK YOUR POTENTIAL</h2>
+              <p className="mb-4">Upgrade to GRYT Pro for advanced features:</p>
+              <ul className="text-left mb-6 space-y-1">
+                <li>🧠 Advanced AI Coach</li>
+                <li>🎯 Multi-Goal Tracking</li>
+                <li>📊 Analytics Dashboard</li>
+                <li>🏆 Exclusive Rewards</li>
+              </ul>
+              <Link to="/premium">
+                <BrutalistButton variant="accent" className="w-full">
+                  UPGRADE TO PRO - $9.99/MONTH
                 </BrutalistButton>
+              </Link>
+            </div>
+          </BrutalistCard>
+        )}
+
+        {currentGoal ? (
+          <>
+            <BrutalistCard>
+              <h2 className="brutalist-h2 mb-4">YOUR CURRENT GOAL</h2>
+              <h3 className="font-bold text-lg mb-2">{currentGoal.title}</h3>
+              <BrutalistProgressBar progress={currentGoal.progress} className="mb-4" />
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <p className="font-bold">STREAK: {currentGoal.dailyStreak} days</p>
+                  <p className="font-bold">PROGRESS: {Math.round(currentGoal.progress)}%</p>
+                </div>
+                <div>
+                  <p className="font-bold">COMPLETED: {currentGoal.completedDays} days</p>
+                  <p className="font-bold">TOTAL: {currentGoal.totalDays} days</p>
+                </div>
               </div>
+            </BrutalistCard>
+
+            {todaysCoaching && (
+              <BrutalistCard>
+                <h2 className="brutalist-h2 mb-4">TODAY'S COACHING</h2>
+                <div className="mb-4">
+                  <h3 className="font-bold mb-2">DAILY AFFIRMATION</h3>
+                  <p className="italic">{todaysCoaching.affirmation}</p>
+                </div>
+                <div className="mb-6">
+                  <h3 className="font-bold mb-2">ACTION STEP</h3>
+                  <p>{todaysCoaching.actionStep}</p>
+                </div>
+                <BrutalistButton
+                  onClick={handleToggleProgress}
+                  variant={todaysCoaching.completed ? 'secondary' : 'accent'}
+                  className="w-full"
+                >
+                  {todaysCoaching.completed ? 'COMPLETED ✓' : 'MARK COMPLETE'}
+                </BrutalistButton>
+              </BrutalistCard>
             )}
-          </div>
-        </BrutalistCard>
-      </div>
-
-      {/* Goal Details */}
-      <div className="brutalist-section">
-        <BrutalistCard>
-          <h2 className="brutalist-h2 mb-4">YOUR WHY</h2>
-          <p className="font-bold mb-4">
-            {currentGoal.whyItMatters}
-          </p>
-          <div className="grid grid-cols-2 gap-4 text-center">
-            <div>
-              <p className="brutalist-h2 text-2xl">{currentGoal.completedDays}</p>
-              <p className="text-sm font-bold">DAYS DONE</p>
+          </>
+        ) : (
+          <BrutalistCard>
+            <div className="text-center">
+              <h2 className="brutalist-h2 mb-4">START YOUR JOURNEY</h2>
+              <p className="mb-6">Create your first goal and begin transforming your life!</p>
+              <Link to="/create-goal">
+                <BrutalistButton variant="accent" className="w-full">
+                  CREATE YOUR FIRST GOAL
+                </BrutalistButton>
+              </Link>
             </div>
-            <div>
-              <p className="brutalist-h2 text-2xl">{currentGoal.totalDays - currentGoal.completedDays}</p>
-              <p className="text-sm font-bold">DAYS LEFT</p>
-            </div>
-          </div>
-        </BrutalistCard>
+          </BrutalistCard>
+        )}
+
+        <div className="grid grid-cols-2 gap-4">
+          <Link to="/content">
+            <BrutalistCard>
+              <div className="text-center">
+                <span className="text-2xl mb-2 block">📚</span>
+                <h3 className="font-bold">CONTENT</h3>
+                <p className="text-sm">Courses & Guides</p>
+              </div>
+            </BrutalistCard>
+          </Link>
+
+          <Link to="/coaching">
+            <BrutalistCard>
+              <div className="text-center">
+                <span className="text-2xl mb-2 block">👨‍🏫</span>
+                <h3 className="font-bold">COACHING</h3>
+                <p className="text-sm">1:1 Sessions</p>
+                {!isPremium && (
+                  <span className="text-xs bg-yellow-400 text-black px-1 rounded">PRO</span>
+                )}
+              </div>
+            </BrutalistCard>
+          </Link>
+        </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="brutalist-section space-y-4">
-        <BrutalistButton variant="secondary" onClick={() => navigate('/journal')}>
-          📝 DAILY REFLECTION
-        </BrutalistButton>
-        <BrutalistButton variant="secondary" onClick={() => navigate('/rewards')}>
-          🏆 VIEW REWARDS
-        </BrutalistButton>
-      </div>
-
-      {/* Navigation */}
       <BrutalistNavigation 
         items={[
           { label: 'DASHBOARD', path: '/', icon: '🏠' },
           { label: 'GOALS', path: '/create-goal', icon: '🎯' },
           { label: 'REWARDS', path: '/rewards', icon: '🏆' },
-          { label: 'PROFILE', path: '/profile', icon: '👤' }
+          { label: 'PRO', path: '/premium', icon: '⭐' }
         ]}
       />
     </div>
