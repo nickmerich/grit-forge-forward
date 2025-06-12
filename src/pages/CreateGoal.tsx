@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSupabaseGoalStore } from '@/hooks/useSupabaseGoalStore';
@@ -120,7 +121,7 @@ const CreateGoal = () => {
                 <label className="block font-bold mb-2">GOAL TITLE (BE SPECIFIC)</label>
                 <BrutalistInput
                   value={formData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
+                  onChange={(value) => handleInputChange('title', value)}
                   placeholder="e.g., RUN 5K EVERY MORNING"
                 />
               </div>
@@ -187,7 +188,7 @@ const CreateGoal = () => {
                 <label className="block font-bold mb-2">YOUR SIGNATURE (OPTIONAL)</label>
                 <BrutalistInput
                   value={formData.signature}
-                  onChange={(e) => handleInputChange('signature', e.target.value)}
+                  onChange={(value) => handleInputChange('signature', value)}
                   placeholder="Type your name to sign your commitment"
                 />
               </div>
