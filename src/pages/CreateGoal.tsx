@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSupabaseGoalStore } from '@/hooks/useSupabaseGoalStore';
@@ -102,7 +101,7 @@ const CreateGoal = () => {
                     onClick={() => handleInputChange('category', key)}
                     className={`p-4 border-4 font-bold text-left transition-colors ${
                       formData.category === key
-                        ? 'border-brutalist-black bg-brutalist-yellow'
+                        ? 'border-brutalist-black bg-brutalist-green'
                         : 'border-brutalist-black bg-white hover:bg-gray-100'
                     }`}
                   >
@@ -123,7 +122,6 @@ const CreateGoal = () => {
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
                   placeholder="e.g., RUN 5K EVERY MORNING"
-                  maxLength={50}
                 />
               </div>
               <div className="text-sm text-gray-600">
@@ -177,11 +175,12 @@ const CreateGoal = () => {
               <h2 className="brutalist-h2 mb-6 text-center">SET YOUR DEADLINE</h2>
               <div className="mb-6">
                 <label className="block font-bold mb-2">WHEN WILL YOU COMPLETE THIS?</label>
-                <BrutalistInput
+                <input
                   type="date"
                   value={formData.deadline}
                   onChange={(e) => handleInputChange('deadline', e.target.value)}
                   min={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
+                  className="w-full bg-brutalist-white text-brutalist-black border-4 border-brutalist-black px-4 py-3 text-lg font-bold focus:outline-none focus:border-brutalist-green focus:shadow-brutalist-green"
                 />
               </div>
               <div className="mb-6">

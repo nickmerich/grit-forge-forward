@@ -50,7 +50,6 @@ export const AuthForm = () => {
               <div>
                 <label className="block text-sm font-bold mb-2">FULL NAME</label>
                 <BrutalistInput
-                  type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Enter your full name"
@@ -62,7 +61,6 @@ export const AuthForm = () => {
             <div>
               <label className="block text-sm font-bold mb-2">EMAIL</label>
               <BrutalistInput
-                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
@@ -73,7 +71,6 @@ export const AuthForm = () => {
             <div>
               <label className="block text-sm font-bold mb-2">PASSWORD</label>
               <BrutalistInput
-                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
