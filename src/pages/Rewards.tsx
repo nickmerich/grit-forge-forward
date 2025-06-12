@@ -129,19 +129,19 @@ const Rewards = () => {
       <div className="brutalist-section">
         <div className="flex space-x-2 mb-6">
           <BrutalistButton
-            variant={filter === 'all' ? 'default' : 'secondary'}
+            variant={filter === 'all' ? 'primary' : 'secondary'}
             onClick={() => setFilter('all')}
           >
             ALL
           </BrutalistButton>
           <BrutalistButton
-            variant={filter === 'free' ? 'default' : 'secondary'}
+            variant={filter === 'free' ? 'primary' : 'secondary'}
             onClick={() => setFilter('free')}
           >
             FREE
           </BrutalistButton>
           <BrutalistButton
-            variant={filter === 'premium' ? 'default' : 'secondary'}
+            variant={filter === 'premium' ? 'primary' : 'secondary'}
             onClick={() => setFilter('premium')}
           >
             PRO ⭐
