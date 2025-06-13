@@ -8,7 +8,7 @@ interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
+  type: string; // Changed from union type to string to match database
   read: boolean;
   action_url?: string;
   created_at: string;
@@ -73,7 +73,12 @@ export const useNotifications = () => {
     }
   };
 
-  const createNotification = async (notification: Omit<Notification, 'id' | 'created_at' | 'read'>) => {
+  const createNotification = async (notification: {
+    title: string;
+    message: string;
+    type: string;
+    action_url?: string;
+  }) => {
     if (!user) return;
 
     try {
