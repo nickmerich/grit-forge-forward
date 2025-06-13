@@ -30,12 +30,6 @@ export const AuthForm = () => {
     }
   };
 
-  const handleQuickLogin = () => {
-    setEmail('demo@gryt.app');
-    setPassword('demo123');
-    setIsLogin(true);
-  };
-
   return (
     <div className="brutalist-container">
       <div className="brutalist-header">
@@ -50,22 +44,6 @@ export const AuthForm = () => {
           <h2 className="brutalist-h2 mb-6 text-center">
             {isLogin ? 'WELCOME BACK' : 'JOIN THE GRYT COMMUNITY'}
           </h2>
-
-          {/* Quick Demo Login Button */}
-          {isLogin && (
-            <div className="mb-6">
-              <BrutalistButton
-                onClick={handleQuickLogin}
-                variant="accent"
-                className="w-full"
-              >
-                🚀 QUICK DEMO LOGIN
-              </BrutalistButton>
-              <p className="text-center text-sm font-bold mt-2 text-gray-600">
-                Try the app instantly with demo credentials
-              </p>
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
@@ -120,7 +98,6 @@ export const AuthForm = () => {
           <div className="mt-6 p-4 border-2 border-brutalist-black bg-gray-50">
             <h3 className="font-bold mb-2">💡 QUICK TIPS:</h3>
             <ul className="text-sm space-y-1">
-              <li>• Use the DEMO LOGIN for instant access</li>
               <li>• No email verification required</li>
               <li>• Simple password requirements</li>
             </ul>
