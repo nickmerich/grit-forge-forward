@@ -30,6 +30,12 @@ export const AuthForm = () => {
     }
   };
 
+  const handleQuickLogin = () => {
+    setEmail('demo@gryt.app');
+    setPassword('demo123');
+    setIsLogin(true);
+  };
+
   return (
     <div className="brutalist-container">
       <div className="brutalist-header">
@@ -45,38 +51,48 @@ export const AuthForm = () => {
             {isLogin ? 'WELCOME BACK' : 'JOIN THE GRYT COMMUNITY'}
           </h2>
 
+          {/* Quick Demo Login Button */}
+          {isLogin && (
+            <div className="mb-6">
+              <BrutalistButton
+                onClick={handleQuickLogin}
+                variant="accent"
+                className="w-full"
+              >
+                🚀 QUICK DEMO LOGIN
+              </BrutalistButton>
+              <p className="text-center text-sm font-bold mt-2 text-gray-600">
+                Try the app instantly with demo credentials
+              </p>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
-              <div>
-                <label className="block text-sm font-bold mb-2">FULL NAME</label>
-                <BrutalistInput
-                  value={fullName}
-                  onChange={setFullName}
-                  placeholder="Enter your full name"
-                  required
-                />
-              </div>
+              <BrutalistInput
+                value={fullName}
+                onChange={setFullName}
+                label="FULL NAME"
+                placeholder="Enter your full name"
+                required
+              />
             )}
 
-            <div>
-              <label className="block text-sm font-bold mb-2">EMAIL</label>
-              <BrutalistInput
-                value={email}
-                onChange={setEmail}
-                placeholder="Enter your email"
-                required
-              />
-            </div>
+            <BrutalistInput
+              value={email}
+              onChange={setEmail}
+              label="EMAIL"
+              placeholder="Enter your email"
+              required
+            />
 
-            <div>
-              <label className="block text-sm font-bold mb-2">PASSWORD</label>
-              <BrutalistInput
-                value={password}
-                onChange={setPassword}
-                placeholder="Enter your password"
-                required
-              />
-            </div>
+            <BrutalistInput
+              value={password}
+              onChange={setPassword}
+              label="PASSWORD"
+              placeholder="Enter your password"
+              required
+            />
 
             <BrutalistButton
               type="submit"
@@ -91,13 +107,23 @@ export const AuthForm = () => {
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="font-bold underline"
+              className="font-bold underline hover:text-brutalist-green transition-colors"
             >
               {isLogin 
                 ? "Don't have an account? SIGN UP" 
                 : "Already have an account? LOG IN"
               }
             </button>
+          </div>
+
+          {/* Login Tips */}
+          <div className="mt-6 p-4 border-2 border-brutalist-black bg-gray-50">
+            <h3 className="font-bold mb-2">💡 QUICK TIPS:</h3>
+            <ul className="text-sm space-y-1">
+              <li>• Use the DEMO LOGIN for instant access</li>
+              <li>• No email verification required</li>
+              <li>• Simple password requirements</li>
+            </ul>
           </div>
         </BrutalistCard>
       </div>

@@ -12,6 +12,7 @@ interface BrutalistInputProps {
   required?: boolean;
   label?: string;
   error?: string;
+  type?: 'text' | 'email' | 'password';
 }
 
 const BrutalistInput = ({
@@ -23,7 +24,8 @@ const BrutalistInput = ({
   minLength,
   required,
   label,
-  error
+  error,
+  type = 'text'
 }: BrutalistInputProps) => {
   return (
     <div className={cn("space-y-2", className)}>
@@ -34,7 +36,7 @@ const BrutalistInput = ({
         </label>
       )}
       <input
-        type="text"
+        type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
