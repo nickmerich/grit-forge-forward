@@ -9,6 +9,50 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          description: string | null
+          goal_id: string | null
+          icon: string | null
+          id: string
+          points_earned: number | null
+          title: string
+          type: string
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          description?: string | null
+          goal_id?: string | null
+          icon?: string | null
+          id?: string
+          points_earned?: number | null
+          title: string
+          type: string
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          description?: string | null
+          goal_id?: string | null
+          icon?: string | null
+          id?: string
+          points_earned?: number | null
+          title?: string
+          type?: string
+          unlocked_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "achievements_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coaching_sessions: {
         Row: {
           booking_id: string | null
@@ -129,8 +173,39 @@ export type Database = {
           },
         ]
       }
+      goal_templates: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string
+          id: string
+          is_premium: boolean | null
+          suggested_duration_days: number | null
+          title: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description: string
+          id?: string
+          is_premium?: boolean | null
+          suggested_duration_days?: number | null
+          title: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          is_premium?: boolean | null
+          suggested_duration_days?: number | null
+          title?: string
+        }
+        Relationships: []
+      }
       goals: {
         Row: {
+          archived: boolean | null
           category: string
           completed_days: number | null
           created_at: string | null
@@ -141,6 +216,7 @@ export type Database = {
           is_active: boolean | null
           progress: number | null
           signature: string | null
+          tags: string[] | null
           title: string
           total_days: number
           updated_at: string | null
@@ -148,6 +224,7 @@ export type Database = {
           why_it_matters: string
         }
         Insert: {
+          archived?: boolean | null
           category: string
           completed_days?: number | null
           created_at?: string | null
@@ -158,6 +235,7 @@ export type Database = {
           is_active?: boolean | null
           progress?: number | null
           signature?: string | null
+          tags?: string[] | null
           title: string
           total_days: number
           updated_at?: string | null
@@ -165,6 +243,7 @@ export type Database = {
           why_it_matters: string
         }
         Update: {
+          archived?: boolean | null
           category?: string
           completed_days?: number | null
           created_at?: string | null
@@ -175,6 +254,7 @@ export type Database = {
           is_active?: boolean | null
           progress?: number | null
           signature?: string | null
+          tags?: string[] | null
           title?: string
           total_days?: number
           updated_at?: string | null
@@ -238,6 +318,39 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          action_url: string | null
+          created_at: string | null
+          id: string
+          message: string
+          read: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          action_url?: string | null
+          created_at?: string | null
+          id?: string
+          message: string
+          read?: boolean | null
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          action_url?: string | null
+          created_at?: string | null
+          id?: string
+          message?: string
+          read?: boolean | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       premium_content: {
         Row: {
           content_type: string
@@ -277,8 +390,11 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string | null
+          daily_reminder_time: string | null
           full_name: string | null
           id: string
+          onboarding_completed: boolean | null
+          preferences: Json | null
           subscription_tier: string | null
           timezone: string | null
           updated_at: string | null
@@ -286,8 +402,11 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          daily_reminder_time?: string | null
           full_name?: string | null
           id: string
+          onboarding_completed?: boolean | null
+          preferences?: Json | null
           subscription_tier?: string | null
           timezone?: string | null
           updated_at?: string | null
@@ -295,8 +414,11 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          daily_reminder_time?: string | null
           full_name?: string | null
           id?: string
+          onboarding_completed?: boolean | null
+          preferences?: Json | null
           subscription_tier?: string | null
           timezone?: string | null
           updated_at?: string | null
@@ -399,33 +521,42 @@ export type Database = {
       }
       reflections: {
         Row: {
+          achievements_today: string[] | null
+          challenges_faced: string | null
           created_at: string
           date: string | null
           goal_id: string | null
           gratitude_note: string | null
           id: string
+          lessons_learned: string | null
           mood_score: number | null
           reflection_text: string | null
           tomorrow_intention: string | null
           user_id: string | null
         }
         Insert: {
+          achievements_today?: string[] | null
+          challenges_faced?: string | null
           created_at?: string
           date?: string | null
           goal_id?: string | null
           gratitude_note?: string | null
           id?: string
+          lessons_learned?: string | null
           mood_score?: number | null
           reflection_text?: string | null
           tomorrow_intention?: string | null
           user_id?: string | null
         }
         Update: {
+          achievements_today?: string[] | null
+          challenges_faced?: string | null
           created_at?: string
           date?: string | null
           goal_id?: string | null
           gratitude_note?: string | null
           id?: string
+          lessons_learned?: string | null
           mood_score?: number | null
           reflection_text?: string | null
           tomorrow_intention?: string | null

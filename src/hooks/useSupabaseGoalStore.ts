@@ -12,6 +12,7 @@ interface Profile {
   timezone: string;
   created_at: string;
   updated_at: string;
+  daily_reminder_time?: string;
 }
 
 export const useSupabaseGoalStore = () => {
